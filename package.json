@@ -1,0 +1,78 @@
+{
+  "name": "mongone",
+  "version": "1.0.3",
+  "description": "MongoDb ODM base on mongoose and tegund",
+  "author": "aimleo",
+  "license": "MIT",
+  "main": "",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [],
+  "engines": {
+    "node": ">=10.x",
+    "npm": ">= 6.x"
+  },
+  "browserslist": [
+    "maintained node versions"
+  ],
+  "scripts": {
+    "cm": "npx git-cz",
+    "release": "standard-version && npm run push && npm run pub2npm",
+    "release:d": "standard-version --dry-run",
+    "push": "git push --follow-tags origin master",
+    "pub2npm": "nrm use npm && npm publish",
+    "lint": "node_modules/eslint/bin/eslint.js ./src --fix"
+  },
+  "dependencies": {
+    "dot-prop": "^6.0.1",
+    "emittery": "^0.8.1",
+    "mongoose": "^5.12.0",
+    "tegund": "^2.2.1"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.21.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.3.1",
+    "standard-version": "^9.1.1"
+  },
+  "eslintConfig": {
+    "root": true,
+    "parser": "babel-eslint",
+    "parserOptions": {
+      "sourceType": "module"
+    },
+    "env": {
+      "browser": true,
+      "node": true,
+      "es6": true,
+      "jest": true
+    },
+    "extends": "standard"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "semi": false,
+    "trailingComma": "none",
+    "arrowParens": "avoid"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  }
+}
