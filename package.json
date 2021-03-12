@@ -4,7 +4,7 @@
   "description": "MongoDb ODM base on mongoose and tegund",
   "author": "aimleo",
   "license": "MIT",
-  "main": "",
+  "main": "src",
   "publishConfig": {
     "access": "public"
   },
