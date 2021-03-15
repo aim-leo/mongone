@@ -13,6 +13,7 @@ class M extends Emitter {
     this.t.initComputedHooks(this)
     this.t.initInputHooks(this)
     this.t.initOutputHooks(this)
+    this.t.initRefValidateHooks(this)
 
     this.on('validate', this._validate.bind(this))
   }
@@ -54,6 +55,8 @@ class M extends Emitter {
 
         await this.emit('validate', { doc, env: 'create' })
 
+        await this.emit('afterValidate', { doc, env: 'create' })
+
         doc.createTime = new Date()
         doc.updateTime = new Date()
       }
@@ -85,7 +88,9 @@ class M extends Emitter {
 
         await this.emit('beforeChange', { doc, env: 'update' })
 
-        await this.emit('validate', { doc, env: 'create' })
+        await this.emit('validate', { doc, env: 'update' })
+
+        await this.emit('afterValidate', { doc, env: 'update' })
 
         doc.updateTime = new Date()
 
@@ -117,7 +122,9 @@ class M extends Emitter {
 
       await this.emit('beforeChange', { doc, env: 'update' })
 
-      await this.emit('validate', { doc, env: 'create' })
+      await this.emit('validate', { doc, env: 'update' })
+
+      await this.emit('afterValidate', { doc, env: 'update' })
 
       doc.updateTime = new Date()
 

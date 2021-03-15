@@ -61,7 +61,21 @@ T.prototype.default = function (val) {
 T.prototype.ref = function (val) {
   asset(val, 'String')
 
+  // this ref field can not override
+  if (this._ref) {
+    throw new Error('The ref field is defined, can not override it')
+  }
+
   this._ref = val
+
+  defineUnEnumerableProperty(this, 'refFilter', function (refFilter, message) {
+    asset(refFilter, 'Function')
+
+    this._refFilter = refFilter
+    this._refFilterMessage = message
+
+    return this
+  })
 
   return this
 }
@@ -256,6 +270,16 @@ function loopGetProps(prop) {
     res.sort((a, b) => getPropDeep(a.key) - getPropDeep(b.key))
   )
 
+  defineUnEnumerableProperty(res, 'toObject', () => {
+    const obj = {}
+
+    for (const item of res) {
+      obj[item.key] = item.value
+    }
+
+    return obj
+  })
+
   return res
 }
 
@@ -317,6 +341,47 @@ ObjectT.prototype.initOutputHooks = function (event) {
   return outputTransforms
 }
 
+ObjectT.prototype.initRefValidateHooks = function (event) {
+  if (!this._child) return
+
+  const refs = loopGetProps.call(this, '_ref').toObject()
+  const refFilters = loopGetProps.call(this, '_refFilter').toObject()
+  const refFilterMessages = loopGetProps.call(this, '_refFilterMessage').toObject()
+
+  event.on('afterValidate', async ({ doc }) => {
+    for (const key in refs) {
+      const value = refs[key]
+
+      const model = mongoose.models[value]
+
+      if (!model) {
+        throw new Error(`Failed， The Table: ${value} is not exsist`)
+      }
+      const id = get(doc, key)
+      const queryedDoc = await model.findById(id)
+
+      if (!queryedDoc) {
+        throw new Error(
+          `Failed， The Id: ${id} is not exsist at Table: ${value}`
+        )
+      }
+
+      const refFilter = refFilters[key]
+
+      // additional ref filter validate
+      if (refFilter) {
+        const res = await refFilter(queryedDoc)
+
+        if (res !== true) {
+          throw new Error(
+            refFilterMessages[key] || `Failed， refFilter validate not pass`
+          )
+        }
+      }
+    }
+  })
+}
+
 ObjectT.prototype.getExcludeField = function (addtionalSelect = {}) {
   const t = object({
     override: any().optional(),
@@ -350,8 +415,6 @@ ObjectT.prototype.getExcludeField = function (addtionalSelect = {}) {
 
   // rm include field
   if (include.length > 0) list = list.filter(item => !include.includes(item))
-
-  console.log(list)
 
   defineUnEnumerableProperty(list, 'formatString', () =>
     list.map(item => '-' + item).join(' ')
