@@ -424,7 +424,7 @@ function toMongooseSchema() {
     let value = schemaJson[key]
 
     if (value.__isSubSchemaJson__) {
-      value = toMongooseSchemaJson.call(value)
+      value = new mongoose.Schema(value)
     }
   }
 
