@@ -123,7 +123,7 @@ T.prototype.output = function (val) {
   return this
 }
 
-function toMongooseSchemaJson () {
+function toMongooseSchemaJson() {
   if (this._type === 'Object' && this._child) {
     const res = {}
 
@@ -222,7 +222,7 @@ ObjectT.prototype.initComputedHooks = function (event) {
 }
 // get prop and it child's prop, return a array like: [{ key: 'propKey', value: 'propValue' }]
 // if call loopGetProp(prop).toReverse(), will return a array orderby it's prop deep, little deep prop will at last
-function loopGetProps (prop) {
+function loopGetProps(prop) {
   const res = []
   for (const key in this._child) {
     if (this._child[key][prop]) {
@@ -235,7 +235,7 @@ function loopGetProps (prop) {
     // if child is a objectT
     if (this._child[key] instanceof ObjectT) {
       res.push(
-        ...loopGetProps.call(this._child[key], prop).map((item) => {
+        ...loopGetProps.call(this._child[key], prop).map(item => {
           item.key = key + '.' + item.key
 
           return item
@@ -244,7 +244,7 @@ function loopGetProps (prop) {
     }
   }
 
-  function getPropDeep (prop) {
+  function getPropDeep(prop) {
     return prop.split('.').length
   }
 
@@ -267,7 +267,7 @@ ObjectT.prototype.initInputHooks = function (event) {
 
   if (inputTransforms.length === 0) return
 
-  async function onChange (doc) {
+  async function onChange(doc) {
     for (const item of inputTransforms) {
       if (has(doc, item.key)) {
         const oldValue = get(doc, item.key)
@@ -293,7 +293,7 @@ ObjectT.prototype.initOutputHooks = function (event) {
 
   if (outputTransforms.length === 0) return
 
-  async function onChange (doc) {
+  async function onChange(doc) {
     for (const item of outputTransforms) {
       if (has(doc, item.key)) {
         const oldValue = get(doc, item.key)
@@ -304,7 +304,7 @@ ObjectT.prototype.initOutputHooks = function (event) {
     }
   }
 
-  event.on('afterQuery', async (res) => {
+  event.on('afterQuery', async res => {
     if (Array.isArray(res)) {
       for (const item of res) {
         await onChange(item)
@@ -342,26 +342,19 @@ ObjectT.prototype.getExcludeField = function (addtionalSelect = {}) {
   // get all computed props
   if (!this._child) return
 
-  let list = [...exclude]
-  for (const key in this._child) {
-    if (this._child[key]._exclude) {
-      list.push(key)
-
-      continue
-    }
-
-    if (this._child[key] instanceof ObjectT) {
-      list.push(
-        ...this._child[key].getExcludeField().map((item) => key + '.' + item)
-      )
-    }
-  }
+  const list = loopGetProps
+    .call(this, '_exclude')
+    .filter(item => item.value)
+    .map(item => item.key)
+    .concat(exclude)
 
   // rm include field
-  if (include.length > 0) list = list.filter((item) => !include.includes(item))
+  if (include.length > 0) list = list.filter(item => !include.includes(item))
+
+  console.log(list)
 
   defineUnEnumerableProperty(list, 'formatString', () =>
-    list.map((item) => '-' + item).join(' ')
+    list.map(item => '-' + item).join(' ')
   )
 
   return list
@@ -418,13 +411,13 @@ ObjectT.prototype.getPopulateField = function (addtionalPopulate = {}) {
       }
     }
 
-    list = list.filter((item) => !!item)
+    list = list.filter(item => !!item)
   }
 
   return list
 }
 
-function toMongooseSchema () {
+function toMongooseSchema() {
   const schemaJson = toMongooseSchemaJson.call(this)
 
   for (const key in schemaJson) {
