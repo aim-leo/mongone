@@ -10,6 +10,7 @@ const {
   array,
   object,
   never,
+  at,
 
   defineType
 } = require('tegund')
@@ -17,7 +18,7 @@ const {
 require('./proto')
 
 const id = defineType('id', () =>
-  string()
+  at(string(), object())
     .schemaType('ObjectId')
     .addValidator({
       name: 'validateMongoObjectId',

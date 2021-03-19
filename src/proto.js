@@ -12,7 +12,8 @@ const {
   string,
   asset,
   defineUnEnumerableProperty,
-  removeEmpty
+  removeEmpty,
+  ValidateError
 } = require('tegund')
 
 T.prototype.unique = function (val = true) {
@@ -192,69 +193,25 @@ ObjectT.prototype.loopGetProps = function () {
   return loopGetProps.call(this.toMongooseSchemaJson(), 'type')
 }
 
-// ObjectT.prototype.initComputedHooks = function (event) {
-//   // get all computed props
-//   if (!this._child) return
-
-//   let computedProps = []
-
-//   for (const key in this._child) {
-//     if (this._child[key]._computed) {
-//       computedProps.push({
-//         key,
-//         computed: this._child[key]._computed,
-//         computedPriority: this._child[key]._computedPriority
-//       })
-//     }
-//   }
-
-//   if (computedProps.length === 0) return
-
-//   // sort
-//   computedProps = computedProps.sort(
-//     (a, b) => a.computedPriority - b.computedPriority
-//   )
-
-//   event.on('beforeChange', async ({ doc }) => {
-//     for (const prop of computedProps) {
-//       try {
-//         const { key, computed } = prop
-//         const res = await computed(doc)
-
-//         if (
-//           res === undefined ||
-//           Number.isNaN(res) ||
-//           res === null ||
-//           res instanceof Error
-//         ) {
-//           continue
-//         }
-
-//         doc[key] = res
-//       } catch {}
-//     }
-//   })
-
-//   return computedProps
-// }
-
 ObjectT.prototype.initComputedHooks = function (event) {
   // get all computed props
   if (!this._child) return
 
   const computeds = loopGetProps.call(this, '_computed').toReverse()
-  const computedPrioritys = loopGetProps.call(this, '_computedPriority').sort((a, b) => {
-    const aLevel = a.key.split('.').length
-    const bLevel = b.key.split('.').length
+  const computedPrioritys = loopGetProps
+    .call(this, '_computedPriority')
+    .sort((a, b) => {
+      const aLevel = a.key.split('.').length
+      const bLevel = b.key.split('.').length
 
-    if (aLevel > bLevel) {
-      return -1
-    } else if (aLevel === bLevel) {
-      return a.value - b.value
-    }
+      if (aLevel > bLevel) {
+        return -1
+      } else if (aLevel === bLevel) {
+        return a.value - b.value
+      }
 
-    return 1
-  })
+      return 1
+    })
 
   if (computeds.length === 0) return
 
@@ -262,11 +219,14 @@ ObjectT.prototype.initComputedHooks = function (event) {
     for (const prop of computedPrioritys) {
       try {
         const { key } = prop
-        const { value: computed } = computeds.filter(item => item.key === key)[0]
+        const { value: computed } = computeds.filter(
+          item => item.key === key
+        )[0]
 
         const path = key.split('.')
 
-        const parentDoc = path.length < 2 ? doc : get(doc, path.slice(0, -1).join('.'))
+        const parentDoc =
+          path.length < 2 ? doc : get(doc, path.slice(0, -1).join('.'))
 
         const res = await computed.call(parentDoc, doc, parentDoc)
 
@@ -315,15 +275,15 @@ function loopGetProps(prop) {
     return prop.split('.').length
   }
 
-  defineUnEnumerableProperty(res, 'toReverse', function() {
+  defineUnEnumerableProperty(res, 'toReverse', function () {
     return this.sort((a, b) => getPropDeep(b.key) - getPropDeep(a.key))
   })
 
-  defineUnEnumerableProperty(res, 'toPositive', function() {
+  defineUnEnumerableProperty(res, 'toPositive', function () {
     return this.sort((a, b) => getPropDeep(a.key) - getPropDeep(b.key))
   })
 
-  defineUnEnumerableProperty(res, 'toObject', function() {
+  defineUnEnumerableProperty(res, 'toObject', function () {
     const obj = {}
 
     for (const item of this) {
@@ -430,15 +390,17 @@ ObjectT.prototype.initRefValidateHooks = function (event) {
       const model = mongoose.models[value]
 
       if (!model) {
-        throw new Error(`Failed， The Table: ${value} is not exsist`)
+        throw new ValidateError({
+          message: `Failed， The Table: ${value} is not exsist`
+        })
       }
       const id = get(doc, key)
       const queryedDoc = await model.findById(id)
 
       if (!queryedDoc) {
-        throw new Error(
-          `Failed， The Id: ${id} is not exsist at Table: ${value}`
-        )
+        throw new ValidateError({
+          message: `Failed， The Id: ${id} is not exsist at Table: ${value}`
+        })
       }
 
       const refFilter = refFilters[key]
@@ -448,9 +410,10 @@ ObjectT.prototype.initRefValidateHooks = function (event) {
         const res = await refFilter(queryedDoc)
 
         if (res !== true) {
-          throw new Error(
-            refFilterMessages[key] || 'Failed， refFilter validate not pass'
-          )
+          throw new ValidateError({
+            message:
+              refFilterMessages[key] || 'Failed， refFilter validate not pass'
+          })
         }
       }
     }
