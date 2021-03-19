@@ -36,6 +36,8 @@ test(`test ref`, async () => {
     name: 'user1'
   })
 
+  console.log(res)
+
   expect(res).toBeInstanceOf(ValidateError)
 
   // insert a user with a wrong id
@@ -63,7 +65,6 @@ test(`test ref`, async () => {
   })
 })
 
-
 test(`test ref filter`, async () => {
   const { object, string, integer, id } = require('../src/type')
 
@@ -82,7 +83,9 @@ test(`test ref filter`, async () => {
   const post = createModel(
     object({
       name: string(),
-      cate: id().ref('postCategory').refFilter(val => val.name === 'cate2', refFilterMessage)
+      cate: id()
+        .ref('postCategory')
+        .refFilter(val => val.name === 'cate2', refFilterMessage)
     }),
     'post'
   )

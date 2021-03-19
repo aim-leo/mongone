@@ -32,7 +32,6 @@ test(`test output`, async () => {
   })
 })
 
-
 test(`test input`, async () => {
   const { object, string } = require('../src/type')
 
@@ -55,7 +54,7 @@ test(`test input`, async () => {
   queryRes = await foo.queryById(res[0]._id)
 
   expect(queryRes).toMatchObject({
-    name: 'name',
+    name: 'name'
   })
 })
 
@@ -108,7 +107,8 @@ test(`test relative computed, default set priority by define order`, async () =>
       lastName: string(),
       fullName: string().computed(doc => doc.firstName + ' ' + doc.lastName),
       address: string(),
-      nameWithAddress: string().computed(doc => {  // related to another computed
+      nameWithAddress: string().computed(doc => {
+        // related to another computed
         return `${doc.address} ${doc.fullName}`
       })
     })
@@ -140,7 +140,8 @@ test(`test relative computed, set priority by manual`, async () => {
       lastName: string(),
       fullName: string().computed(doc => doc.firstName + ' ' + doc.lastName, 1),
       address: string(),
-      nameWithAddress: string().computed(doc => {  // related to another computed
+      nameWithAddress: string().computed(doc => {
+        // related to another computed
         return `${doc.address} ${doc.fullName}`
       }, 0)
     })
@@ -174,11 +175,12 @@ test(`test relative computed, defaullt call sub computed at first`, async () => 
       address: {
         country: string(),
         city: string(),
-        fullAddress: string().computed(function() {
+        fullAddress: string().computed(function () {
           return this.country + ' ' + this.city
         })
       },
-      nameWithAddress: string().computed(doc => {  // related to another computed
+      nameWithAddress: string().computed(doc => {
+        // related to another computed
         return `${doc.address.fullAddress} ${doc.fullName}`
       })
     })
@@ -188,8 +190,8 @@ test(`test relative computed, defaullt call sub computed at first`, async () => 
     firstName: 'Tim',
     lastName: 'Cook',
     address: {
-      country: "American",
-      city: "Alabama"
+      country: 'American',
+      city: 'Alabama'
     }
   })
 
@@ -198,5 +200,8 @@ test(`test relative computed, defaullt call sub computed at first`, async () => 
   queryRes = await foo.queryById(res[0]._id)
 
   expect(queryRes).toHaveProperty('fullName', 'Tim Cook')
-  expect(queryRes).toHaveProperty('nameWithAddress', 'American Alabama Tim Cook')
+  expect(queryRes).toHaveProperty(
+    'nameWithAddress',
+    'American Alabama Tim Cook'
+  )
 })

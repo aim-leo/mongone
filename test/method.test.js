@@ -4,7 +4,6 @@ const addedMethods = [
   'forbidUpdate',
   'default',
   'ref',
-  'autoJoin',
   'schemaOption',
   'schemaType',
   'computed',
@@ -13,7 +12,7 @@ const addedMethods = [
   'toMongooseSchemaJson'
 ]
 
-const booleanSetMethods = ['unique', 'exclude', 'forbidUpdate', 'autoJoin']
+const booleanSetMethods = ['unique', 'exclude', 'forbidUpdate']
 const stringSetMethods = ['ref', 'schemaType']
 
 test(`the origin tegund should not have those method`, () => {
@@ -65,19 +64,6 @@ test(`set boolean params`, () => {
     }
   }
 })
-
-test(`autoJoin can set a string params`, () => {
-  const { string } = require('../src/type')
-
-  const t = string()
-
-  expect(t._autoJoin).toBe(undefined)
-
-  t.autoJoin('name')
-
-  expect(t._autoJoin).toBe('name')
-})
-
 
 test(`set string params`, () => {
   const { string } = require('../src/type')

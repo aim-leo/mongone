@@ -9,9 +9,17 @@ let mongoServer
 beforeAll(async () => {
   mongoServer = new MongoMemoryServer()
   const mongoUri = await mongoServer.getUri()
-  await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }, err => {
-    if (err) console.error(err)
-  })
+  await mongoose.connect(
+    mongoUri,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false
+    },
+    err => {
+      if (err) console.error(err)
+    }
+  )
 })
 
 afterAll(async () => {

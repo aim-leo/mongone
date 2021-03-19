@@ -44,7 +44,6 @@ test(`rest methods`, async () => {
   expect(doc).toBe(null)
 })
 
-
 test(`validate string type, min max`, async () => {
   const { object, string } = require('../src/type')
 
@@ -156,17 +155,17 @@ test(`exclude test`, async () => {
   expect(docs).not.toHaveProperty('age')
 
   // override select
-  docs = await foo.queryById(res[0]._id, { override: "name age" })
+  docs = await foo.queryById(res[0]._id, { override: 'name age' })
 
   expect(docs).toHaveProperty('age', 10)
 
   // or include it
-  docs = await foo.queryById(res[0]._id, { include: ["age"] })
+  docs = await foo.queryById(res[0]._id, { include: ['age'] })
 
   expect(docs).toHaveProperty('age', 10)
 
   // or exclude more
-  docs = await foo.queryById(res[0]._id, { exclude: ["name"] })
+  docs = await foo.queryById(res[0]._id, { exclude: ['name'] })
 
   expect(docs).not.toHaveProperty('name')
 })

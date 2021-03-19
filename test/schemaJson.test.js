@@ -23,15 +23,13 @@ test(`array transform to mongoose schema type`, () => {
 
   const t2 = array('string')
 
-  expect(t2.toMongooseSchemaJson()).toMatchObject(
-    {
-      type: [
-        {
-          type: 'String'
-        }
-      ]
-    }
-  )
+  expect(t2.toMongooseSchemaJson()).toMatchObject({
+    type: [
+      {
+        type: 'String'
+      }
+    ]
+  })
 })
 
 test(`object transform to mongoose schema type`, () => {

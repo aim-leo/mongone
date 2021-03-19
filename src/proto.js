@@ -81,13 +81,13 @@ T.prototype.ref = function (val) {
     return this
   })
 
-  return this
-}
+  defineUnEnumerableProperty(this, 'autoJoin', function (val = true) {
+    asset(val, ['Boolean', 'String'])
 
-T.prototype.autoJoin = function (val = true) {
-  asset(val, ['Boolean', 'String'])
+    this._autoJoin = val
 
-  this._autoJoin = val
+    return this
+  })
 
   return this
 }
@@ -141,7 +141,7 @@ T.prototype.output = function (val) {
   return this
 }
 
-function toMongooseSchemaJson() {
+function toMongooseSchemaJson () {
   const option = this._schemaOption || {}
   return removeEmpty(
     {
@@ -249,10 +249,10 @@ ObjectT.prototype.initComputedHooks = function (event) {
 
 // get prop and it child's prop, return a array like: [{ key: 'propKey', value: 'propValue' }]
 // if call loopGetProp(prop).toReverse(), will return a array orderby it's prop deep, little deep prop will at last
-function loopGetProps(prop) {
+function loopGetProps (prop) {
   const res = []
   for (const key in this._child) {
-    if (this._child[key].hasOwnProperty(prop)) {
+    if (Object.prototype.hasOwnProperty.call(this._child[key], prop)) {
       res.push({
         key,
         value: this._child[key][prop]
@@ -271,7 +271,7 @@ function loopGetProps(prop) {
     }
   }
 
-  function getPropDeep(prop) {
+  function getPropDeep (prop) {
     return prop.split('.').length
   }
 
@@ -324,7 +324,7 @@ ObjectT.prototype.initInputHooks = function (event) {
 
   if (inputTransforms.length === 0) return
 
-  async function onChange(doc) {
+  async function onChange (doc) {
     for (const item of inputTransforms) {
       if (has(doc, item.key)) {
         const oldValue = get(doc, item.key)
@@ -350,7 +350,7 @@ ObjectT.prototype.initOutputHooks = function (event) {
 
   if (outputTransforms.length === 0) return
 
-  async function onChange(doc) {
+  async function onChange (doc) {
     for (const item of outputTransforms) {
       if (has(doc, item.key)) {
         const oldValue = get(doc, item.key)
@@ -423,8 +423,8 @@ ObjectT.prototype.initRefValidateHooks = function (event) {
 ObjectT.prototype.getExcludeField = function (addtionalSelect = {}) {
   const t = object({
     override: any().optional(),
-    exclude: array('String').optional(),
-    include: array('String').optional()
+    exclude: array(string()).optional(),
+    include: array(string()).optional()
   })
 
   const err = t.test(addtionalSelect)
@@ -452,7 +452,9 @@ ObjectT.prototype.getExcludeField = function (addtionalSelect = {}) {
     .concat(exclude)
 
   // rm include field
-  if (include.length > 0) list = list.filter(item => !include.includes(item))
+  if (include && include.length > 0) {
+    list = list.filter(item => !include.includes(item))
+  }
 
   defineUnEnumerableProperty(list, 'formatString', () =>
     list.map(item => '-' + item).join(' ')
@@ -464,10 +466,10 @@ ObjectT.prototype.getExcludeField = function (addtionalSelect = {}) {
 ObjectT.prototype.getPopulateField = function (addtionalPopulate = {}) {
   const t = object({
     override: any().optional(),
-    exclude: array('String').optional(),
+    exclude: array(string()).optional(),
     include: at(
       array(object({ path: string(), select: string().optional() })),
-      array('String')
+      array(string())
     ).optional()
   })
 
@@ -503,7 +505,7 @@ ObjectT.prototype.getPopulateField = function (addtionalPopulate = {}) {
   }
 
   // rm exclude field
-  if (exclude.length > 0) {
+  if (exclude && exclude.length > 0) {
     for (const prop in list) {
       const item = list[prop]
       const key = typeof item === 'object' ? item.path : item
@@ -518,7 +520,7 @@ ObjectT.prototype.getPopulateField = function (addtionalPopulate = {}) {
   return list
 }
 
-function toMongooseSchema(schemaJson) {
+function toMongooseSchema (schemaJson) {
   if (schemaJson.type && typeof schemaJson.type === 'object') {
     for (const key in schemaJson.type) {
       schemaJson.type[key] = toMongooseSchema(schemaJson.type[key])

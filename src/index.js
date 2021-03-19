@@ -6,7 +6,7 @@ const { ValidateError } = require('tegund')
 class M extends Emitter {
   static mongoose = mongoose
 
-  constructor(name, t) {
+  constructor (name, t) {
     super()
 
     this.t = t
@@ -23,7 +23,7 @@ class M extends Emitter {
     this.on('validate', this._validate.bind(this))
   }
 
-  _validate({ doc, env }) {
+  _validate ({ doc, env }) {
     let err = null
 
     if (env === 'update') {
@@ -39,7 +39,7 @@ class M extends Emitter {
     if (err) throw err
   }
 
-  async _onError(error) {
+  async _onError (error) {
     if (error.code === 11000) {
       error = new ValidateError({
         message: 'There was a duplicate key error'
@@ -51,7 +51,7 @@ class M extends Emitter {
     return error
   }
 
-  async insert(docs, ...args) {
+  async insert (docs, ...args) {
     try {
       if (!Array.isArray(docs)) {
         docs = [docs]
@@ -80,7 +80,7 @@ class M extends Emitter {
     }
   }
 
-  async update(filter = {}, update, options = {}) {
+  async update (filter = {}, update, options = {}) {
     if (options.new !== false) options.new = true
     try {
       const result = []
@@ -114,7 +114,7 @@ class M extends Emitter {
     }
   }
 
-  async updateOne(filter, update, options = {}) {
+  async updateOne (filter, update, options = {}) {
     if (options.new !== false) options.new = true
     try {
       // get the docs
@@ -143,7 +143,7 @@ class M extends Emitter {
     }
   }
 
-  updateById(id, ...args) {
+  updateById (id, ...args) {
     return this.updateOne(
       {
         _id: id
@@ -152,7 +152,7 @@ class M extends Emitter {
     )
   }
 
-  async delete(filter, ...args) {
+  async delete (filter, ...args) {
     try {
       // get the docs
       const docs = await this.model.find(filter)
@@ -171,7 +171,7 @@ class M extends Emitter {
     }
   }
 
-  async deleteOne(filter, ...args) {
+  async deleteOne (filter, ...args) {
     try {
       // get the docs
       const doc = await this.model.findOne(filter)
@@ -188,7 +188,7 @@ class M extends Emitter {
     }
   }
 
-  deleteById(id, ...args) {
+  deleteById (id, ...args) {
     return this.deleteOne(
       {
         _id: id
@@ -197,11 +197,11 @@ class M extends Emitter {
     )
   }
 
-  count(...args) {
+  count (...args) {
     return this.model.count(...args)
   }
 
-  async find(filter, exclude, option = {}, ...args) {
+  async find (filter, exclude, option = {}, ...args) {
     try {
       await this.emit('beforeQuery', filter)
 
@@ -227,13 +227,13 @@ class M extends Emitter {
     }
   }
 
-  async findOne(filter, exclude, option = {}, ...args) {
+  async findOne (filter, exclude, option = {}, ...args) {
     option.one = true
 
     return this.find(filter, exclude, option, ...args)
   }
 
-  findById(id, ...args) {
+  findById (id, ...args) {
     return this.findOne(
       {
         _id: id
@@ -242,15 +242,15 @@ class M extends Emitter {
     )
   }
 
-  query(...args) {
+  query (...args) {
     return this.find(...args)
   }
 
-  queryOne(...args) {
+  queryOne (...args) {
     return this.findOne(...args)
   }
 
-  queryById(...args) {
+  queryById (...args) {
     return this.findById(...args)
   }
 }
