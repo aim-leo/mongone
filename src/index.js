@@ -1,15 +1,20 @@
 const mongoose = require('mongoose')
 const Emitter = require('emittery')
 
+const { ValidateError } = require('tegund')
+
 class M extends Emitter {
-  constructor (name, t) {
+  static mongoose = mongoose
+
+  constructor(name, t) {
     super()
 
     this.t = t
     this.schema = t.toMongooseSchema()
-    this.model = mongoose.model(name, this.schema)
+    this.model = M.mongoose.model(name, this.schema)
 
     // init computed hooks
+    this.t.initSetDefaultHooks(this)
     this.t.initComputedHooks(this)
     this.t.initInputHooks(this)
     this.t.initOutputHooks(this)
@@ -18,7 +23,7 @@ class M extends Emitter {
     this.on('validate', this._validate.bind(this))
   }
 
-  _validate ({ doc, env }) {
+  _validate({ doc, env }) {
     let err = null
 
     if (env === 'update') {
@@ -34,15 +39,19 @@ class M extends Emitter {
     if (err) throw err
   }
 
-  async _onError (error) {
+  async _onError(error) {
     if (error.code === 11000) {
-      error = new Error('There was a duplicate key error')
+      error = new ValidateError({
+        message: 'There was a duplicate key error'
+      })
     }
 
     await this.emit('error', error)
+
+    return error
   }
 
-  async insert (docs, ...args) {
+  async insert(docs, ...args) {
     try {
       if (!Array.isArray(docs)) {
         docs = [docs]
@@ -55,10 +64,10 @@ class M extends Emitter {
 
         await this.emit('validate', { doc, env: 'create' })
 
-        await this.emit('afterValidate', { doc, env: 'create' })
-
         doc.createTime = new Date()
         doc.updateTime = new Date()
+
+        await this.emit('beforePostEffect', { doc, env: 'create' })
       }
 
       const res = await this.model.insertMany(docs, ...args)
@@ -67,13 +76,11 @@ class M extends Emitter {
 
       return res
     } catch (e) {
-      await this._onError(e)
-
-      return Promise.reject(e)
+      return await this._onError(e)
     }
   }
 
-  async update (filter = {}, update, options = {}) {
+  async update(filter = {}, update, options = {}) {
     if (options.new !== false) options.new = true
     try {
       const result = []
@@ -83,16 +90,16 @@ class M extends Emitter {
       for (const doc of docs) {
         await this.emit('beforeUpdate', update)
 
+        await this.emit('validate', { doc: update, env: 'update' })
+
         // assign the changes
         Object.assign(doc, update)
 
         await this.emit('beforeChange', { doc, env: 'update' })
 
-        await this.emit('validate', { doc, env: 'update' })
-
-        await this.emit('afterValidate', { doc, env: 'update' })
-
         doc.updateTime = new Date()
+
+        await this.emit('beforePostEffect', { doc, env: 'update' })
 
         const res = await this.model.findByIdAndUpdate(doc._id, doc, options)
 
@@ -103,13 +110,11 @@ class M extends Emitter {
 
       return result
     } catch (e) {
-      await this._onError(e)
-
-      return Promise.reject(e)
+      return await this._onError(e)
     }
   }
 
-  async updateOne (filter, update, options = {}) {
+  async updateOne(filter, update, options = {}) {
     if (options.new !== false) options.new = true
     try {
       // get the docs
@@ -117,16 +122,16 @@ class M extends Emitter {
 
       await this.emit('beforeUpdate', update)
 
+      await this.emit('validate', { doc: update, env: 'update' })
+
       // assign the changes
       Object.assign(doc, update)
 
       await this.emit('beforeChange', { doc, env: 'update' })
 
-      await this.emit('validate', { doc, env: 'update' })
-
-      await this.emit('afterValidate', { doc, env: 'update' })
-
       doc.updateTime = new Date()
+
+      await this.emit('beforePostEffect', { doc, env: 'update' })
 
       const res = await this.model.findByIdAndUpdate(doc._id, doc, options)
 
@@ -134,13 +139,11 @@ class M extends Emitter {
 
       return res
     } catch (e) {
-      await this._onError(e)
-
-      return Promise.reject(e)
+      return await this._onError(e)
     }
   }
 
-  updateById (id, ...args) {
+  updateById(id, ...args) {
     return this.updateOne(
       {
         _id: id
@@ -149,7 +152,7 @@ class M extends Emitter {
     )
   }
 
-  async delete (filter, ...args) {
+  async delete(filter, ...args) {
     try {
       // get the docs
       const docs = await this.model.find(filter)
@@ -164,13 +167,11 @@ class M extends Emitter {
 
       return res
     } catch (e) {
-      await this._onError(e)
-
-      return Promise.reject(e)
+      return await this._onError(e)
     }
   }
 
-  async deleteOne (filter, ...args) {
+  async deleteOne(filter, ...args) {
     try {
       // get the docs
       const doc = await this.model.findOne(filter)
@@ -183,13 +184,11 @@ class M extends Emitter {
 
       return res
     } catch (e) {
-      await this._onError(e)
-
-      return Promise.reject(e)
+      return await this._onError(e)
     }
   }
 
-  deleteById (id, ...args) {
+  deleteById(id, ...args) {
     return this.deleteOne(
       {
         _id: id
@@ -198,11 +197,11 @@ class M extends Emitter {
     )
   }
 
-  count (...args) {
+  count(...args) {
     return this.model.count(...args)
   }
 
-  async find (filter, exclude, option = {}, ...args) {
+  async find(filter, exclude, option = {}, ...args) {
     try {
       await this.emit('beforeQuery', filter)
 
@@ -224,25 +223,35 @@ class M extends Emitter {
 
       return res
     } catch (e) {
-      await this._onError(e)
-
-      return Promise.reject(e)
+      return await this._onError(e)
     }
   }
 
-  async findOne (filter, exclude, option = {}, ...args) {
+  async findOne(filter, exclude, option = {}, ...args) {
     option.one = true
 
     return this.find(filter, exclude, option, ...args)
   }
 
-  findById (id, ...args) {
+  findById(id, ...args) {
     return this.findOne(
       {
         _id: id
       },
       ...args
     )
+  }
+
+  query(...args) {
+    return this.find(...args)
+  }
+
+  queryOne(...args) {
+    return this.findOne(...args)
+  }
+
+  queryById(...args) {
+    return this.findById(...args)
   }
 }
 

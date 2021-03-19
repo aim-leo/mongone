@@ -53,6 +53,9 @@ T.prototype.forbidUpdate = function (val = true) {
 }
 
 T.prototype.default = function (val) {
+  // the default params should passed the test
+  const err = this.test(val)
+  if (err) throw err
   this._default = val
 
   return this
@@ -88,10 +91,10 @@ T.prototype.autoJoin = function (val = true) {
   return this
 }
 
-T.prototype.option = function (val) {
+T.prototype.schemaOption = function (val) {
   asset(val, 'Object')
 
-  this._option = val
+  this._schemaOption = val
 
   return this
 }
@@ -138,19 +141,7 @@ T.prototype.output = function (val) {
 }
 
 function toMongooseSchemaJson() {
-  if (this._type === 'Object' && this._child) {
-    const res = {}
-
-    defineUnEnumerableProperty(res, '__isSubSchemaJson__', true)
-
-    for (const key in this._child) {
-      res[key] = toMongooseSchemaJson.call(this._child[key])
-    }
-
-    return res
-  }
-
-  const option = this._option || {}
+  const option = this._schemaOption || {}
   return removeEmpty(
     {
       type: this._schemaType || this._type,
@@ -171,7 +162,7 @@ ArrayT.prototype.toMongooseSchemaJson = function () {
   const schemaJson = toMongooseSchemaJson.call(this)
   const childSchemaJson = toMongooseSchemaJson.call(this._childCate)
   if (this._childCate) {
-    schemaJson.type = [childSchemaJson.type]
+    schemaJson.type = [childSchemaJson]
   }
 
   return schemaJson
@@ -182,41 +173,102 @@ ObjectT.prototype.toMongooseSchemaJson = function () {
     throw new Error('schema is empty')
   }
 
-  const res = {}
+  const res = toMongooseSchemaJson.call(this)
+  res.type = {}
   for (const key in this._child) {
-    res[key] = toMongooseSchemaJson.call(this._child[key])
+    const item = this._child[key]
+
+    if (item._type === 'Object' && this._child) {
+      res.type[key] = ObjectT.prototype.toMongooseSchemaJson.call(item)
+      continue
+    }
+    res.type[key] = toMongooseSchemaJson.call(item)
   }
 
   return res
 }
 
+ObjectT.prototype.loopGetProps = function () {
+  return loopGetProps.call(this.toMongooseSchemaJson(), 'type')
+}
+
+// ObjectT.prototype.initComputedHooks = function (event) {
+//   // get all computed props
+//   if (!this._child) return
+
+//   let computedProps = []
+
+//   for (const key in this._child) {
+//     if (this._child[key]._computed) {
+//       computedProps.push({
+//         key,
+//         computed: this._child[key]._computed,
+//         computedPriority: this._child[key]._computedPriority
+//       })
+//     }
+//   }
+
+//   if (computedProps.length === 0) return
+
+//   // sort
+//   computedProps = computedProps.sort(
+//     (a, b) => a.computedPriority - b.computedPriority
+//   )
+
+//   event.on('beforeChange', async ({ doc }) => {
+//     for (const prop of computedProps) {
+//       try {
+//         const { key, computed } = prop
+//         const res = await computed(doc)
+
+//         if (
+//           res === undefined ||
+//           Number.isNaN(res) ||
+//           res === null ||
+//           res instanceof Error
+//         ) {
+//           continue
+//         }
+
+//         doc[key] = res
+//       } catch {}
+//     }
+//   })
+
+//   return computedProps
+// }
+
 ObjectT.prototype.initComputedHooks = function (event) {
   // get all computed props
   if (!this._child) return
 
-  let computedProps = []
-  for (const key in this._child) {
-    if (this._child[key]._computed) {
-      computedProps.push({
-        key,
-        computed: this._child[key]._computed,
-        computedPriority: this._child[key]._computedPriority
-      })
+  const computeds = loopGetProps.call(this, '_computed').toReverse()
+  const computedPrioritys = loopGetProps.call(this, '_computedPriority').sort((a, b) => {
+    const aLevel = a.key.split('.').length
+    const bLevel = b.key.split('.').length
+
+    if (aLevel > bLevel) {
+      return -1
+    } else if (aLevel === bLevel) {
+      return a.value - b.value
     }
-  }
 
-  if (computedProps.length === 0) return
+    return 1
+  })
 
-  // sort
-  computedProps = computedProps.sort(
-    (a, b) => a.computedPriority - b.computedPriority
-  )
+  if (computeds.length === 0) return
 
   event.on('beforeChange', async ({ doc }) => {
-    for (const prop of computedProps) {
+    for (const prop of computedPrioritys) {
       try {
-        const { key, computed } = prop
-        const res = await computed(doc)
+        const { key } = prop
+        const { value: computed } = computeds.filter(item => item.key === key)[0]
+
+        const path = key.split('.')
+
+        const parentDoc = path.length < 2 ? doc : get(doc, path.slice(0, -1).join('.'))
+
+        const res = await computed.call(parentDoc, doc, parentDoc)
 
         if (
           res === undefined ||
@@ -227,19 +279,20 @@ ObjectT.prototype.initComputedHooks = function (event) {
           continue
         }
 
-        doc[key] = res
+        set(doc, key, res)
       } catch {}
     }
   })
 
-  return computedProps
+  return computeds
 }
+
 // get prop and it child's prop, return a array like: [{ key: 'propKey', value: 'propValue' }]
 // if call loopGetProp(prop).toReverse(), will return a array orderby it's prop deep, little deep prop will at last
 function loopGetProps(prop) {
   const res = []
   for (const key in this._child) {
-    if (this._child[key][prop]) {
+    if (this._child[key].hasOwnProperty(prop)) {
       res.push({
         key,
         value: this._child[key][prop]
@@ -262,18 +315,18 @@ function loopGetProps(prop) {
     return prop.split('.').length
   }
 
-  defineUnEnumerableProperty(res, 'toReverse', () =>
-    res.sort((a, b) => getPropDeep(b.key) - getPropDeep(a.key))
-  )
+  defineUnEnumerableProperty(res, 'toReverse', function() {
+    return this.sort((a, b) => getPropDeep(b.key) - getPropDeep(a.key))
+  })
 
-  defineUnEnumerableProperty(res, 'toPositive', () =>
-    res.sort((a, b) => getPropDeep(a.key) - getPropDeep(b.key))
-  )
+  defineUnEnumerableProperty(res, 'toPositive', function() {
+    return this.sort((a, b) => getPropDeep(a.key) - getPropDeep(b.key))
+  })
 
-  defineUnEnumerableProperty(res, 'toObject', () => {
+  defineUnEnumerableProperty(res, 'toObject', function() {
     const obj = {}
 
-    for (const item of res) {
+    for (const item of this) {
       obj[item.key] = item.value
     }
 
@@ -281,6 +334,26 @@ function loopGetProps(prop) {
   })
 
   return res
+}
+
+// assign default value
+ObjectT.prototype.initSetDefaultHooks = function (event) {
+  if (!this._child) return
+
+  const defaults = loopGetProps.call(this, '_default').toReverse()
+
+  if (defaults.length === 0) return
+
+  event.on('beforeCreate', doc => {
+    for (const item of defaults) {
+      // if the field is undefined
+      if (doc[item.key] === undefined) {
+        set(doc, item.key, item.value)
+      }
+    }
+  })
+
+  return defaults
 }
 
 // transform value before doc insert or update to db, it will transform deeper prop first
@@ -346,9 +419,11 @@ ObjectT.prototype.initRefValidateHooks = function (event) {
 
   const refs = loopGetProps.call(this, '_ref').toObject()
   const refFilters = loopGetProps.call(this, '_refFilter').toObject()
-  const refFilterMessages = loopGetProps.call(this, '_refFilterMessage').toObject()
+  const refFilterMessages = loopGetProps
+    .call(this, '_refFilterMessage')
+    .toObject()
 
-  event.on('afterValidate', async ({ doc }) => {
+  event.on('beforePostEffect', async ({ doc }) => {
     for (const key in refs) {
       const value = refs[key]
 
@@ -374,7 +449,7 @@ ObjectT.prototype.initRefValidateHooks = function (event) {
 
         if (res !== true) {
           throw new Error(
-            refFilterMessages[key] || `Failed， refFilter validate not pass`
+            refFilterMessages[key] || 'Failed， refFilter validate not pass'
           )
         }
       }
@@ -407,7 +482,7 @@ ObjectT.prototype.getExcludeField = function (addtionalSelect = {}) {
   // get all computed props
   if (!this._child) return
 
-  const list = loopGetProps
+  let list = loopGetProps
     .call(this, '_exclude')
     .filter(item => item.value)
     .map(item => item.key)
@@ -480,20 +555,33 @@ ObjectT.prototype.getPopulateField = function (addtionalPopulate = {}) {
   return list
 }
 
-function toMongooseSchema() {
-  const schemaJson = toMongooseSchemaJson.call(this)
-
-  for (const key in schemaJson) {
-    let value = schemaJson[key]
-
-    if (value.__isSubSchemaJson__) {
-      value = new mongoose.Schema(value)
+function toMongooseSchema(schemaJson) {
+  if (schemaJson.type && typeof schemaJson.type === 'object') {
+    for (const key in schemaJson.type) {
+      schemaJson.type[key] = toMongooseSchema(schemaJson.type[key])
     }
+
+    schemaJson.type = new mongoose.Schema(schemaJson.type)
   }
 
-  return new mongoose.Schema(schemaJson)
+  return schemaJson
 }
 
-ObjectT.prototype.toMongooseSchema = toMongooseSchema
+ObjectT.prototype.toMongooseSchema = function () {
+  const schemaJson = this.toMongooseSchemaJson()
+
+  // as root schema, auto add createTime and updateTime field
+  schemaJson.type.createTime = {
+    type: Date,
+    default: Date.now
+  }
+
+  schemaJson.type.updateTime = {
+    type: Date,
+    default: Date.now
+  }
+
+  return toMongooseSchema(schemaJson).type
+}
 
 module.exports = T

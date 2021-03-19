@@ -21,7 +21,7 @@ const id = defineType('id', () =>
     .schemaType('ObjectId')
     .addValidator({
       name: 'validateMongoObjectId',
-      validator: (val) => mongoose.Types.ObjectId.isValid(val),
+      validator: val => mongoose.Types.ObjectId.isValid(val),
       message: 'Expected a valid mongodb ObjectId'
     })
 )
@@ -31,8 +31,8 @@ const ids = defineType('ids', () => array(id()))
 module.exports = {
   string,
   number,
-  integer,
-  float,
+  integer: (...args) => integer(...args).schemaType('Number'),
+  float: (...args) => float(...args).schemaType('Number'),
   date,
   boolean,
   array,
