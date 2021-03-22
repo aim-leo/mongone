@@ -2,7 +2,7 @@ const { createModel } = require('./mongo-server')
 const { ValidateError } = require('tegund')
 
 test(`test output`, async () => {
-  const { object, string, integer } = require('../src/type')
+  const { object, string, integer } = require('../type')
 
   let res = null
   let queryRes = null
@@ -33,7 +33,7 @@ test(`test output`, async () => {
 })
 
 test(`test input`, async () => {
-  const { object, string } = require('../src/type')
+  const { object, string } = require('../type')
 
   let res = null
   let queryRes = null
@@ -59,7 +59,7 @@ test(`test input`, async () => {
 })
 
 test(`test computed`, async () => {
-  const { object, string } = require('../src/type')
+  const { object, string } = require('../type')
 
   let res = null
   let queryRes = null
@@ -96,7 +96,7 @@ test(`test computed`, async () => {
 })
 
 test(`test relative computed, default set priority by define order`, async () => {
-  const { object, string } = require('../src/type')
+  const { object, string } = require('../type')
 
   let res = null
   let queryRes = null
@@ -129,7 +129,7 @@ test(`test relative computed, default set priority by define order`, async () =>
 })
 
 test(`test relative computed, set priority by manual`, async () => {
-  const { object, string } = require('../src/type')
+  const { object, string } = require('../type')
 
   let res = null
   let queryRes = null
@@ -162,7 +162,7 @@ test(`test relative computed, set priority by manual`, async () => {
 })
 
 test(`test relative computed, defaullt call sub computed at first`, async () => {
-  const { object, string } = require('../src/type')
+  const { object, string } = require('../type')
 
   let res = null
   let queryRes = null

@@ -4,7 +4,7 @@
   "description": "MongoDb ODM base on mongoose and tegund",
   "author": "aimleo",
   "license": "MIT",
-  "main": "src",
+  "main": "index.js",
   "publishConfig": {
     "access": "public"
   },
@@ -22,7 +22,7 @@
     "release:d": "standard-version --dry-run",
     "push": "git push --follow-tags origin master",
     "pub2npm": "nrm use npm && npm publish",
-    "lint": "node_modules/eslint/bin/eslint.js ./src --fix",
+    "lint": "node_modules/eslint/bin/eslint.js ./*.js --fix",
     "test": "jest"
   },
   "dependencies": {

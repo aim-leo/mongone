@@ -3,7 +3,7 @@ const Emitter = require('emittery')
 
 const { ValidateError } = require('tegund')
 
-class M extends Emitter {
+class Mongone extends Emitter {
   static mongoose = mongoose
 
   constructor (name, t) {
@@ -11,7 +11,7 @@ class M extends Emitter {
 
     this.t = t
     this.schema = t.toMongooseSchema()
-    this.model = M.mongoose.model(name, this.schema)
+    this.model = Mongone.mongoose.model(name, this.schema)
 
     // init computed hooks
     this.t.initSetDefaultHooks(this)
@@ -255,4 +255,4 @@ class M extends Emitter {
   }
 }
 
-module.exports = M
+module.exports = Mongone

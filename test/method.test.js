@@ -25,7 +25,7 @@ test(`the origin tegund should not have those method`, () => {
 
 test(`the new tegund should have those method`, () => {
   const { T } = require('tegund')
-  const { string } = require('../src/type')
+  const { string } = require('../type')
 
   for (const item of addedMethods) {
     expect(string()[item]).toBeDefined()
@@ -36,7 +36,7 @@ test(`the new tegund should have those method`, () => {
 })
 
 test(`set boolean params`, () => {
-  const { string } = require('../src/type')
+  const { string } = require('../type')
 
   const t = string()
 
@@ -66,7 +66,7 @@ test(`set boolean params`, () => {
 })
 
 test(`set string params`, () => {
-  const { string } = require('../src/type')
+  const { string } = require('../type')
 
   const t = string()
 
@@ -85,7 +85,7 @@ test(`set string params`, () => {
 })
 
 test(`set computed params`, () => {
-  const { string } = require('../src/type')
+  const { string } = require('../type')
 
   const t = string()
   const func = () => {}
@@ -105,7 +105,7 @@ test(`set computed params`, () => {
 })
 
 test(`set input params`, () => {
-  const { string } = require('../src/type')
+  const { string } = require('../type')
 
   const t = string()
   const func = () => {}
@@ -118,7 +118,7 @@ test(`set input params`, () => {
 })
 
 test(`set output params`, () => {
-  const { string } = require('../src/type')
+  const { string } = require('../type')
 
   const t = string()
   const func = () => {}
@@ -131,7 +131,7 @@ test(`set output params`, () => {
 })
 
 test(`set default params`, () => {
-  const { string } = require('../src/type')
+  const { string } = require('../type')
 
   const t = string()
 
@@ -147,7 +147,7 @@ test(`set default params`, () => {
 })
 
 test(`set addtional mongoose schema options`, () => {
-  const { string } = require('../src/type')
+  const { string } = require('../type')
 
   const t = string()
 

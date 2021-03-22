@@ -2,7 +2,7 @@ const { createModel } = require('./mongo-server')
 const { ValidateError } = require('tegund')
 
 test(`rest methods`, async () => {
-  const { object, string } = require('../src/type')
+  const { object, string } = require('../type')
 
   const user = createModel(
     object({
@@ -45,7 +45,7 @@ test(`rest methods`, async () => {
 })
 
 test(`validate string type, min max`, async () => {
-  const { object, string } = require('../src/type')
+  const { object, string } = require('../type')
 
   const user = createModel(
     object({
@@ -74,7 +74,7 @@ test(`validate string type, min max`, async () => {
 })
 
 test(`validate unique = false`, async () => {
-  const { object, string } = require('../src/type')
+  const { object, string } = require('../type')
 
   let res = null
 
@@ -105,7 +105,7 @@ test(`validate unique = false`, async () => {
 })
 
 test(`validate unique = true`, async () => {
-  const { object, string } = require('../src/type')
+  const { object, string } = require('../type')
 
   let res = null
 
@@ -130,7 +130,7 @@ test(`validate unique = true`, async () => {
 })
 
 test(`exclude test`, async () => {
-  const { object, string, integer } = require('../src/type')
+  const { object, string, integer } = require('../type')
 
   let res = null
   let docs = null
@@ -171,7 +171,7 @@ test(`exclude test`, async () => {
 })
 
 test(`forbid test`, async () => {
-  const { object, string, integer } = require('../src/type')
+  const { object, string, integer } = require('../type')
 
   let res = null
   let updateRes = null
@@ -220,7 +220,7 @@ test(`forbid test`, async () => {
 })
 
 test(`forbidUpdate test`, async () => {
-  const { object, string, integer } = require('../src/type')
+  const { object, string, integer } = require('../type')
 
   let res = null
   let updateRes = null
@@ -255,7 +255,7 @@ test(`forbidUpdate test`, async () => {
 })
 
 test(`default test`, async () => {
-  const { object, string, integer } = require('../src/type')
+  const { object, string, integer } = require('../type')
 
   let res = null
   let queryRes = null

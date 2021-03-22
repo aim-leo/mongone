@@ -1,7 +1,7 @@
 const typeNames = ['String', 'Number', 'Boolean', 'Date']
 
 test(`basic type transform to mongoose schema type`, () => {
-  const types = require('../src/type')
+  const types = require('../type')
 
   for (const item of typeNames) {
     const t = types[item.toLowerCase()]()
@@ -13,7 +13,7 @@ test(`basic type transform to mongoose schema type`, () => {
 })
 
 test(`array transform to mongoose schema type`, () => {
-  const { array } = require('../src/type')
+  const { array } = require('../type')
 
   const t = array()
 
@@ -33,7 +33,7 @@ test(`array transform to mongoose schema type`, () => {
 })
 
 // test(`object transform to mongoose schema type`, () => {
-//   const { object, string } = require('../src/type')
+//   const { object, string } = require('../type')
 
 //   const t = object({
 //     a: string(),

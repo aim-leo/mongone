@@ -2,7 +2,7 @@ const { createModel } = require('./mongo-server')
 const { ValidateError } = require('tegund')
 
 test(`test ref`, async () => {
-  const { object, string, integer, id } = require('../src/type')
+  const { object, string, integer, id } = require('../type')
 
   let res = null
   let queryRes = null
@@ -64,7 +64,7 @@ test(`test ref`, async () => {
 })
 
 test(`test ref filter`, async () => {
-  const { object, string, integer, id } = require('../src/type')
+  const { object, string, integer, id } = require('../type')
 
   let res = null
   let queryRes = null
