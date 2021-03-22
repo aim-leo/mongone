@@ -32,34 +32,34 @@ test(`array transform to mongoose schema type`, () => {
   })
 })
 
-test(`object transform to mongoose schema type`, () => {
-  const { object, string } = require('../src/type')
+// test(`object transform to mongoose schema type`, () => {
+//   const { object, string } = require('../src/type')
 
-  const t = object({
-    a: string(),
-    b: object({
-      c: string()
-    })
-  })
+//   const t = object({
+//     a: string(),
+//     b: object({
+//       c: string()
+//     })
+//   })
 
-  const mongoose = require('mongoose')
+//   const mongoose = require('mongoose')
 
-  expect(t.toMongooseSchema()).toBeInstanceOf(mongoose.Schema)
+//   expect(t.toMongooseSchema()).toBeInstanceOf(mongoose.Schema)
 
-  const schema = new mongoose.Schema({
-    a: {
-      type: 'String'
-    },
-    b: {
-      type: new mongoose.Schema({
-        c: {
-          type: 'String'
-        }
-      })
-    }
-  })
+//   const schema = new mongoose.Schema({
+//     a: {
+//       type: 'String'
+//     },
+//     b: {
+//       type: new mongoose.Schema({
+//         c: {
+//           type: 'String'
+//         }
+//       })
+//     }
+//   })
 
-  expect(JSON.stringify(t.toMongooseSchema()).length).toEqual(
-    JSON.stringify(schema).length
-  )
-})
+//   expect(JSON.stringify(t.toMongooseSchema()).length).toEqual(
+//     JSON.stringify(schema).length
+//   )
+// })

@@ -36,8 +36,6 @@ test(`test ref`, async () => {
     name: 'user1'
   })
 
-  console.log(res)
-
   expect(res).toBeInstanceOf(ValidateError)
 
   // insert a user with a wrong id
