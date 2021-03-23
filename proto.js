@@ -10,14 +10,14 @@ const {
   array,
   at,
   string,
-  asset,
+  assert,
   defineUnEnumerableProperty,
   removeEmpty,
   ValidateError
 } = require('tegund')
 
 T.prototype.unique = function (val = true) {
-  asset(val, 'Boolean')
+  assert(val, 'Boolean')
 
   this._unique = val
 
@@ -25,7 +25,7 @@ T.prototype.unique = function (val = true) {
 }
 
 T.prototype.exclude = function (val = true) {
-  asset(val, 'Boolean')
+  assert(val, 'Boolean')
 
   if (this._outputTransform) {
     throw new Error('There is no point in setting set for an excluded property')
@@ -37,7 +37,7 @@ T.prototype.exclude = function (val = true) {
 }
 
 T.prototype.forbidUpdate = function (val = true) {
-  asset(val, 'Boolean')
+  assert(val, 'Boolean')
 
   this._forbidUpdate = val
 
@@ -63,7 +63,7 @@ T.prototype.default = function (val) {
 }
 
 T.prototype.ref = function (val) {
-  asset(val, 'String')
+  assert(val, 'String')
 
   // this ref field can not override
   if (this._ref) {
@@ -73,7 +73,7 @@ T.prototype.ref = function (val) {
   this._ref = val
 
   defineUnEnumerableProperty(this, 'refFilter', function (refFilter, message) {
-    asset(refFilter, 'Function')
+    assert(refFilter, 'Function')
 
     this._refFilter = refFilter
     this._refFilterMessage = message
@@ -82,7 +82,7 @@ T.prototype.ref = function (val) {
   })
 
   defineUnEnumerableProperty(this, 'autoJoin', function (val = true) {
-    asset(val, ['Boolean', 'String'])
+    assert(val, ['Boolean', 'String'])
 
     this._autoJoin = val
 
@@ -93,7 +93,7 @@ T.prototype.ref = function (val) {
 }
 
 T.prototype.schemaOption = function (val) {
-  asset(val, 'Object')
+  assert(val, 'Object')
 
   this._schemaOption = val
 
@@ -101,7 +101,7 @@ T.prototype.schemaOption = function (val) {
 }
 
 T.prototype.schemaType = function (val) {
-  asset(val, 'String')
+  assert(val, 'String')
 
   this._schemaType = val
 
@@ -109,8 +109,8 @@ T.prototype.schemaType = function (val) {
 }
 
 T.prototype.computed = function (val, priority = 0) {
-  asset(val, 'Function')
-  asset(priority, 'Integer')
+  assert(val, 'Function')
+  assert(priority, 'Integer')
 
   // set the val to forbid
   this.optional()
@@ -122,7 +122,7 @@ T.prototype.computed = function (val, priority = 0) {
 }
 
 T.prototype.input = function (val) {
-  asset(val, 'Function')
+  assert(val, 'Function')
 
   this._inputTransform = val
 
@@ -130,7 +130,7 @@ T.prototype.input = function (val) {
 }
 
 T.prototype.output = function (val) {
-  asset(val, 'Function')
+  assert(val, 'Function')
 
   if (this._exclude) {
     throw new Error('There is no point in setting set for an excluded property')

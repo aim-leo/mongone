@@ -29,7 +29,7 @@
     "dot-prop": "^6.0.1",
     "emittery": "^0.8.1",
     "mongoose": "^5.12.0",
-    "tegund": "^2.2.6"
+    "tegund": "^2.3.3"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
