@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/aim-leo/mongone/compare/v1.2.2...v1.3.0) (2021-03-23)
+
+
+### Features
+
+* add name for mongone ([a341c50](https://github.com/aim-leo/mongone/commit/a341c5002808f54188c48a9dfc625525c643a38e))
+
 ### [1.2.2](https://github.com/aim-leo/mongone/compare/v1.2.1...v1.2.2) (2021-03-22)
 
 ### [1.2.1](https://github.com/aim-leo/mongone/compare/v1.2.0...v1.2.1) (2021-03-22)
