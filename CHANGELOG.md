@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/aim-leo/mongone/compare/v1.3.0...v1.4.0) (2021-03-23)
+
+
+### Features
+
+* upgrade tegund version ([f5500fc](https://github.com/aim-leo/mongone/commit/f5500fc2b9670dca02121b92fb9c733cb5ae7e54))
+
 ## [1.3.0](https://github.com/aim-leo/mongone/compare/v1.2.2...v1.3.0) (2021-03-23)
 
 
