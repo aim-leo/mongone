@@ -9,6 +9,7 @@ class Mongone extends Emitter {
   constructor (name, t) {
     super()
 
+    this.name = name
     this.t = t
     this.schema = t.toMongooseSchema()
     this.model = Mongone.mongoose.model(name, this.schema)
