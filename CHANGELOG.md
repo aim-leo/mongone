@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/aim-leo/mongone/compare/v1.4.0...v1.5.0) (2021-03-24)
+
+
+### Features
+
+* add search method ([1b11534](https://github.com/aim-leo/mongone/commit/1b11534455187c03377932c454b1b0208762e1d4))
+
 ## [1.4.0](https://github.com/aim-leo/mongone/compare/v1.3.0...v1.4.0) (2021-03-23)
 
 
