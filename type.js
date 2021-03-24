@@ -10,18 +10,20 @@ const {
   array,
   object,
   never,
-  at,
+  id: idType,
 
   defineType
 } = require('tegund')
 
 require('./proto')
 
+// override
 const id = defineType('id', () =>
-  at(string(), object())
+  idType()
+    .clone()
     .schemaType('ObjectId')
     .addValidator({
-      name: 'validateMongoObjectId',
+      name: 'MongoObjectIdValidator',
       validator: val => mongoose.Types.ObjectId.isValid(val),
       message: 'Expected a valid mongodb ObjectId'
     })

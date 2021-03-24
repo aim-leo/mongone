@@ -5,16 +5,13 @@ const {
   T,
   ArrayT,
   ObjectT,
-  any,
-  object,
-  array,
-  at,
-  string,
   assert,
   defineUnEnumerableProperty,
   removeEmpty,
   ValidateError
 } = require('tegund')
+
+const { selectInterface, populateInterface } = require('@mongone/encodeuri')
 
 T.prototype.unique = function (val = true) {
   assert(val, 'Boolean')
@@ -141,7 +138,7 @@ T.prototype.output = function (val) {
   return this
 }
 
-function toMongooseSchemaJson () {
+function toMongooseSchemaJson() {
   const option = this._schemaOption || {}
   return removeEmpty(
     {
@@ -249,7 +246,7 @@ ObjectT.prototype.initComputedHooks = function (event) {
 
 // get prop and it child's prop, return a array like: [{ key: 'propKey', value: 'propValue' }]
 // if call loopGetProp(prop).toReverse(), will return a array orderby it's prop deep, little deep prop will at last
-function loopGetProps (prop) {
+function loopGetProps(prop) {
   const res = []
   for (const key in this._child) {
     if (Object.prototype.hasOwnProperty.call(this._child[key], prop)) {
@@ -271,7 +268,7 @@ function loopGetProps (prop) {
     }
   }
 
-  function getPropDeep (prop) {
+  function getPropDeep(prop) {
     return prop.split('.').length
   }
 
@@ -324,7 +321,7 @@ ObjectT.prototype.initInputHooks = function (event) {
 
   if (inputTransforms.length === 0) return
 
-  async function onChange (doc) {
+  async function onChange(doc) {
     for (const item of inputTransforms) {
       if (has(doc, item.key)) {
         const oldValue = get(doc, item.key)
@@ -350,7 +347,7 @@ ObjectT.prototype.initOutputHooks = function (event) {
 
   if (outputTransforms.length === 0) return
 
-  async function onChange (doc) {
+  async function onChange(doc) {
     for (const item of outputTransforms) {
       if (has(doc, item.key)) {
         const oldValue = get(doc, item.key)
@@ -421,17 +418,7 @@ ObjectT.prototype.initRefValidateHooks = function (event) {
 }
 
 ObjectT.prototype.getExcludeField = function (addtionalSelect = {}) {
-  const t = object({
-    override: any().optional(),
-    exclude: array(string()).optional(),
-    include: array(string()).optional()
-  })
-
-  const err = t.test(addtionalSelect)
-
-  if (err) {
-    throw err
-  }
+  selectInterface.assert(addtionalSelect)
 
   const { override, exclude = [], include = [] } = addtionalSelect
 
@@ -464,20 +451,7 @@ ObjectT.prototype.getExcludeField = function (addtionalSelect = {}) {
 }
 
 ObjectT.prototype.getPopulateField = function (addtionalPopulate = {}) {
-  const t = object({
-    override: any().optional(),
-    exclude: array(string()).optional(),
-    include: at(
-      array(object({ path: string(), select: string().optional() })),
-      array(string())
-    ).optional()
-  })
-
-  const err = t.test(addtionalPopulate)
-
-  if (err) {
-    throw err
-  }
+  populateInterface.assert(addtionalPopulate)
 
   const { override, exclude = [], include = [] } = addtionalPopulate
 
@@ -520,7 +494,7 @@ ObjectT.prototype.getPopulateField = function (addtionalPopulate = {}) {
   return list
 }
 
-function toMongooseSchema (schemaJson) {
+function toMongooseSchema(schemaJson) {
   if (schemaJson.type && typeof schemaJson.type === 'object') {
     for (const key in schemaJson.type) {
       schemaJson.type[key] = toMongooseSchema(schemaJson.type[key])

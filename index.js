@@ -1,16 +1,26 @@
 const mongoose = require('mongoose')
 const Emitter = require('emittery')
 
-const { ValidateError } = require('tegund')
+const { T, ValidateError, object, string, boolean } = require('tegund')
+
+const { searchInterface } = require('@mongone/encodeuri')
 
 class Mongone extends Emitter {
   static mongoose = mongoose
+  static throwError = false
 
-  constructor (name, t) {
+  constructor(name, t, option = {}) {
     super()
+
+    // validate
+    string().assert(name)
+    object().instance(T).assert(t)
+    object({ throwError: boolean().optional() }).assert(option)
 
     this.name = name
     this.t = t
+    this.option = option
+
     this.schema = t.toMongooseSchema()
     this.model = Mongone.mongoose.model(name, this.schema)
 
@@ -24,7 +34,7 @@ class Mongone extends Emitter {
     this.on('validate', this._validate.bind(this))
   }
 
-  _validate ({ doc, env }) {
+  _validate({ doc, env }) {
     let err = null
 
     if (env === 'update') {
@@ -40,7 +50,7 @@ class Mongone extends Emitter {
     if (err) throw err
   }
 
-  async _onError (error) {
+  async _onError(error) {
     if (error.code === 11000) {
       error = new ValidateError({
         message: 'There was a duplicate key error'
@@ -49,10 +59,18 @@ class Mongone extends Emitter {
 
     await this.emit('error', error)
 
+    let throwError = Mongone.throwError
+
+    if ('throwError' in this.option) {
+      throwError = this.option.throwError
+    }
+
+    if (throwError) throw error
+
     return error
   }
 
-  async insert (docs, ...args) {
+  async insert(docs, ...args) {
     try {
       if (!Array.isArray(docs)) {
         docs = [docs]
@@ -81,7 +99,7 @@ class Mongone extends Emitter {
     }
   }
 
-  async update (filter = {}, update, options = {}) {
+  async update(filter = {}, update, options = {}) {
     if (options.new !== false) options.new = true
     try {
       const result = []
@@ -115,7 +133,7 @@ class Mongone extends Emitter {
     }
   }
 
-  async updateOne (filter, update, options = {}) {
+  async updateOne(filter, update, options = {}) {
     if (options.new !== false) options.new = true
     try {
       // get the docs
@@ -144,7 +162,7 @@ class Mongone extends Emitter {
     }
   }
 
-  updateById (id, ...args) {
+  updateById(id, ...args) {
     return this.updateOne(
       {
         _id: id
@@ -153,7 +171,7 @@ class Mongone extends Emitter {
     )
   }
 
-  async delete (filter, ...args) {
+  async delete(filter, ...args) {
     try {
       // get the docs
       const docs = await this.model.find(filter)
@@ -172,7 +190,7 @@ class Mongone extends Emitter {
     }
   }
 
-  async deleteOne (filter, ...args) {
+  async deleteOne(filter, ...args) {
     try {
       // get the docs
       const doc = await this.model.findOne(filter)
@@ -189,7 +207,7 @@ class Mongone extends Emitter {
     }
   }
 
-  deleteById (id, ...args) {
+  deleteById(id, ...args) {
     return this.deleteOne(
       {
         _id: id
@@ -198,11 +216,11 @@ class Mongone extends Emitter {
     )
   }
 
-  count (...args) {
-    return this.model.count(...args)
+  count(...args) {
+    return this.model.countDocuments(...args)
   }
 
-  async find (filter, exclude, option = {}, ...args) {
+  async find(filter, exclude, option = {}, ...args) {
     try {
       await this.emit('beforeQuery', filter)
 
@@ -228,13 +246,13 @@ class Mongone extends Emitter {
     }
   }
 
-  async findOne (filter, exclude, option = {}, ...args) {
+  async findOne(filter, exclude, option = {}, ...args) {
     option.one = true
 
     return this.find(filter, exclude, option, ...args)
   }
 
-  findById (id, ...args) {
+  findById(id, ...args) {
     return this.findOne(
       {
         _id: id
@@ -243,16 +261,85 @@ class Mongone extends Emitter {
     )
   }
 
-  query (...args) {
+  query(...args) {
     return this.find(...args)
   }
 
-  queryOne (...args) {
+  queryOne(...args) {
     return this.findOne(...args)
   }
 
-  queryById (...args) {
+  queryById(...args) {
     return this.findById(...args)
+  }
+
+  async search(option) {
+    try {
+      searchInterface.assert(option)
+
+      const {
+        limit = 10,
+        page = 1,
+        filter = {},
+        select,
+        sort,
+        populate,
+        id,
+        search
+      } = option
+
+      // if define id
+      if (id) {
+        const doc = await this.findById(id, select, {
+          populate
+        })
+        return {
+          count: doc ? 1 : 0,
+          docs: doc ? [doc] : []
+        }
+      }
+
+      // assign search
+      if (search) {
+        const searchFilters = []
+        const reg = {
+          $regex: new RegExp(decodeURIComponent(search.value), 'i')
+        }
+
+        for (const scope of search.scope) {
+          searchFilters.push({
+            [scope]: reg
+          })
+        }
+
+        filter['$or'] = searchFilters
+      }
+
+      const count = await this.count(filter)
+
+      const queryOption = {
+        limit,
+        skip: (page - 1) * limit,
+        sort,
+        populate
+      }
+
+      if (limit === 0 || limit === '0') {
+        delete queryOption.limit
+      }
+
+      const docs =
+        count === 0 ? [] : await this.find(filter, select, queryOption)
+
+      return {
+        docs,
+        count,
+        page,
+        limit
+      }
+    } catch (e) {
+      return await this._onError(e)
+    }
   }
 }
 
