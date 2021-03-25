@@ -43,12 +43,12 @@ test(`test ref`, async () => {
   expect(res).not.toBeInstanceOf(ValidateError)
 
   // query
-  res = await user.queryById(insertRes[0]._id)
+  res = await user.findById(insertRes[0]._id)
 
   expect(res.cate.alias).toBe('cate1_alias')
 
   // override populate
-  res = await user.queryById(insertRes[0]._id, undefined, {
+  res = await user.findById(insertRes[0]._id, undefined, {
     populate: {
       override: [
         {

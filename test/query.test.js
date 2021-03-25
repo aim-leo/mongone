@@ -4,7 +4,7 @@ const { createModel } = require('./mongo-server')
 const { ValidateError } = require('tegund')
 const { integer, string, object } = require('../type')
 
-test(`test search`, async () => {
+test(`test query`, async () => {
   let result = null
 
   const model = createModel(
@@ -27,7 +27,7 @@ test(`test search`, async () => {
   expect(docNum).toBe(20)
 
   // search page 1
-  result = await model.search({})
+  result = await model.query({})
 
   expect(result.count).toBe(20)
   expect(result.limit).toBe(10)
@@ -35,7 +35,7 @@ test(`test search`, async () => {
   expect(result.docs.length).toBe(10)
 
   // page 2
-  result = await model.search({
+  result = await model.query({
     page: 2
   })
 
@@ -45,7 +45,7 @@ test(`test search`, async () => {
   expect(result.docs.length).toBe(10)
 
   // page 3
-  result = await model.search({
+  result = await model.query({
     page: 3
   })
 
@@ -55,7 +55,7 @@ test(`test search`, async () => {
   expect(result.docs.length).toBe(0)
 
   // limit 1
-  result = await model.search({
+  result = await model.query({
     limit: 1
   })
 
@@ -65,7 +65,7 @@ test(`test search`, async () => {
   expect(result.docs.length).toBe(1)
 
   // limit 100
-  result = await model.search({
+  result = await model.query({
     limit: 100
   })
 
@@ -75,7 +75,7 @@ test(`test search`, async () => {
   expect(result.docs.length).toBe(20)
 
   // limit 0
-  result = await model.search({
+  result = await model.query({
     limit: 0
   })
 
@@ -85,15 +85,15 @@ test(`test search`, async () => {
   expect(result.docs.length).toBe(20)
 
   // query by id, invalid id
-  result = await model.search({
+  result = await model.query({
     id: 0
   })
 
   expect(result).toBeInstanceOf(ValidateError)
 
   // query by id, exsist id
-  const doc = await model.queryOne()
-  result = await model.search({
+  const doc = await model.findOne()
+  result = await model.query({
     id: doc._id
   })
 
@@ -101,7 +101,7 @@ test(`test search`, async () => {
   expect(result.docs.length).toBe(1)
 
   // query by id, not exsist id
-  result = await model.search({
+  result = await model.query({
     id: new mongoose.Types.ObjectId()
   })
 
@@ -109,7 +109,7 @@ test(`test search`, async () => {
   expect(result.docs.length).toBe(0)
 
   // query name = name1
-  result = await model.search({
+  result = await model.query({
     filter: {
       name: 'name1'
     }
@@ -121,7 +121,7 @@ test(`test search`, async () => {
   expect(result.docs.length).toBe(1)
 
   // query index >= 5
-  result = await model.search({
+  result = await model.query({
     filter: {
       index: {
         $gte: 5
@@ -135,7 +135,7 @@ test(`test search`, async () => {
   expect(result.docs.length).toBe(10)
 
   // query name includes '1'
-  result = await model.search({
+  result = await model.query({
     search: {
       value: '1',
       scope: ['name']
@@ -148,7 +148,7 @@ test(`test search`, async () => {
   expect(result.docs.length).toBe(10)
 
   // query index >= 5, and name includes '1'
-  result = await model.search({
+  result = await model.query({
     filter: {
       index: {
         $gte: 5

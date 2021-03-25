@@ -55,7 +55,7 @@ test(`test ref`, async () => {
   expect(res).not.toBeInstanceOf(ValidateError)
 
   // query
-  res = await user.queryById(res[0]._id)
+  res = await user.findById(res[0]._id)
 
   expect(res).toMatchObject({
     name: 'user1',

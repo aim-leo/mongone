@@ -24,7 +24,7 @@ test(`test output`, async () => {
   expect(res).not.toBeInstanceOf(ValidateError)
 
   // and try to update it
-  queryRes = await foo.queryById(res[0]._id)
+  queryRes = await foo.findById(res[0]._id)
 
   expect(queryRes).toMatchObject({
     name: 'name',
@@ -51,7 +51,7 @@ test(`test input`, async () => {
   expect(res).not.toBeInstanceOf(ValidateError)
 
   // and try to update it
-  queryRes = await foo.queryById(res[0]._id)
+  queryRes = await foo.findById(res[0]._id)
 
   expect(queryRes).toMatchObject({
     name: 'name'
@@ -79,7 +79,7 @@ test(`test computed`, async () => {
 
   expect(res).not.toBeInstanceOf(ValidateError)
 
-  queryRes = await foo.queryById(res[0]._id)
+  queryRes = await foo.findById(res[0]._id)
 
   expect(queryRes).toHaveProperty('fullName', 'Tim Cook')
 
@@ -90,7 +90,7 @@ test(`test computed`, async () => {
 
   expect(updateRes).not.toBeInstanceOf(ValidateError)
 
-  queryRes = await foo.queryById(res[0]._id)
+  queryRes = await foo.findById(res[0]._id)
 
   expect(queryRes).toHaveProperty('fullName', 'Stefen Cook')
 })
@@ -122,7 +122,7 @@ test(`test relative computed, default set priority by define order`, async () =>
 
   expect(res).not.toBeInstanceOf(ValidateError)
 
-  queryRes = await foo.queryById(res[0]._id)
+  queryRes = await foo.findById(res[0]._id)
 
   expect(queryRes).toHaveProperty('fullName', 'Tim Cook')
   expect(queryRes).toHaveProperty('nameWithAddress', 'American Tim Cook')
@@ -155,7 +155,7 @@ test(`test relative computed, set priority by manual`, async () => {
 
   expect(res).not.toBeInstanceOf(ValidateError)
 
-  queryRes = await foo.queryById(res[0]._id)
+  queryRes = await foo.findById(res[0]._id)
 
   expect(queryRes).toHaveProperty('fullName', 'Tim Cook')
   expect(queryRes).toHaveProperty('nameWithAddress', 'American undefined')
@@ -197,7 +197,7 @@ test(`test relative computed, defaullt call sub computed at first`, async () => 
 
   expect(res).not.toBeInstanceOf(ValidateError)
 
-  queryRes = await foo.queryById(res[0]._id)
+  queryRes = await foo.findById(res[0]._id)
 
   expect(queryRes).toHaveProperty('fullName', 'Tim Cook')
   expect(queryRes).toHaveProperty(

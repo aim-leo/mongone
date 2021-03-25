@@ -99,7 +99,7 @@ test(`validate unique = false`, async () => {
   expect(res).not.toBeInstanceOf(ValidateError)
 
   // query
-  res = await foo.query()
+  res = await foo.find()
 
   expect(res).toMatchObject(docs)
 })
@@ -150,22 +150,22 @@ test(`exclude test`, async () => {
 
   expect(res).not.toBeInstanceOf(ValidateError)
 
-  docs = await foo.queryById(res[0]._id)
+  docs = await foo.findById(res[0]._id)
 
   expect(docs).not.toHaveProperty('age')
 
   // override select
-  docs = await foo.queryById(res[0]._id, { override: 'name age' })
+  docs = await foo.findById(res[0]._id, { override: 'name age' })
 
   expect(docs).toHaveProperty('age', 10)
 
   // or include it
-  docs = await foo.queryById(res[0]._id, { include: ['age'] })
+  docs = await foo.findById(res[0]._id, { include: ['age'] })
 
   expect(docs).toHaveProperty('age', 10)
 
   // or exclude more
-  docs = await foo.queryById(res[0]._id, { exclude: ['name'] })
+  docs = await foo.findById(res[0]._id, { exclude: ['name'] })
 
   expect(docs).not.toHaveProperty('name')
 })
@@ -274,7 +274,7 @@ test(`default test`, async () => {
   expect(res).not.toBeInstanceOf(ValidateError)
 
   // and try to update it
-  queryRes = await foo.queryById(res[0]._id)
+  queryRes = await foo.findById(res[0]._id)
 
   expect(queryRes).toHaveProperty('age', 10)
 
@@ -287,7 +287,7 @@ test(`default test`, async () => {
   expect(res).not.toBeInstanceOf(ValidateError)
 
   // and try to update it
-  queryRes = await foo.queryById(res[0]._id)
+  queryRes = await foo.findById(res[0]._id)
 
   expect(queryRes).toHaveProperty('age', 11)
 })

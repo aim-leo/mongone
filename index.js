@@ -32,6 +32,8 @@ class Mongone extends Emitter {
     this.t.initRefValidateHooks(this)
 
     this.on('validate', this._validate.bind(this))
+
+    this._isMongone = true
   }
 
   _validate({ doc, env }) {
@@ -261,19 +263,7 @@ class Mongone extends Emitter {
     )
   }
 
-  query(...args) {
-    return this.find(...args)
-  }
-
-  queryOne(...args) {
-    return this.findOne(...args)
-  }
-
-  queryById(...args) {
-    return this.findById(...args)
-  }
-
-  async search(option) {
+  async query(option) {
     try {
       searchInterface.assert(option)
 
@@ -287,6 +277,9 @@ class Mongone extends Emitter {
         id,
         search
       } = option
+
+      limit = Number(limit)
+      page = Number(page)
 
       // if define id
       if (id) {
