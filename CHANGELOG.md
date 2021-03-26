@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/aim-leo/mongone/compare/v1.5.1...v1.6.0) (2021-03-26)
+
+
+### Features
+
+* add decorator ([c33052f](https://github.com/aim-leo/mongone/commit/c33052f8355ab1008ed28aa629c06332c7baf82f))
+
 ### [1.5.1](https://github.com/aim-leo/mongone/compare/v1.5.0...v1.5.1) (2021-03-25)
 
 ## [1.5.0](https://github.com/aim-leo/mongone/compare/v1.4.0...v1.5.0) (2021-03-24)
