@@ -267,16 +267,9 @@ class Mongone extends Emitter {
     try {
       searchInterface.assert(option)
 
-      const {
-        limit = 10,
-        page = 1,
-        filter = {},
-        select,
-        sort,
-        populate,
-        id,
-        search
-      } = option
+      const { filter = {}, select, sort, populate, id, search } = option
+
+      let { limit = 10, page = 1 } = option
 
       limit = Number(limit)
       page = Number(page)
