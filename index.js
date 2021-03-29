@@ -9,6 +9,51 @@ class Mongone extends Emitter {
   static mongoose = mongoose
   static throwError = false
 
+  static connection = null
+  static connected = false
+
+  static connect(
+    url,
+    option = {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false
+    }
+  ) {
+    string().assert(url)
+    object().assert(option)
+
+    if (Mongone.connection) return Mongone.connection
+
+    mongoose.connect(url, option)
+
+    return new Promise((resolve, reject) => {
+      mongoose.connection.on('error', e => {
+        console.error(`MongoDB: ${url} connect failed!`)
+
+        Mongone.connected = false
+
+        reject(e)
+      })
+      mongoose.connection.once('open', () => {
+        console.log(`MongoDB: ${url} connect success!`)
+
+        Mongone.connected = true
+
+        resolve(mongoose.connection)
+      })
+
+      Mongone.connection = mongoose.connection
+    })
+  }
+
+  static disconnect() {
+    mongoose.disconnect()
+
+    Mongone.connected = false
+    Mongone.connection = null
+  }
+
   constructor(name, t, option = {}) {
     super()
 
@@ -140,6 +185,13 @@ class Mongone extends Emitter {
     try {
       // get the docs
       const doc = await this.model.findOne(filter)
+
+      if (!doc) {
+        const e = new Error('update fail: can not find this document')
+        e.status = 400
+
+        throw e
+      }
 
       await this.emit('beforeUpdate', update)
 
