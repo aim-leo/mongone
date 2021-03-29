@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/aim-leo/mongone/compare/v1.6.0...v1.7.0) (2021-03-29)
+
+
+### Features
+
+* add static method to connect | disconect db ([4e0ad66](https://github.com/aim-leo/mongone/commit/4e0ad66e55a32a772c5e441ca3d5b83ea7262d33))
+
 ## [1.6.0](https://github.com/aim-leo/mongone/compare/v1.5.1...v1.6.0) (2021-03-26)
 
 

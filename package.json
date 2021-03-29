@@ -1,6 +1,6 @@
 {
   "name": "mongone",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "MongoDb ODM base on mongoose and tegund",
   "author": "aimleo",
   "license": "MIT",
